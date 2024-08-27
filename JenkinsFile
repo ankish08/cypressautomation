@@ -6,6 +6,10 @@ pipeline {
         choice(name: 'BROWSER', choices:['chrome','edge','firefox'],description: "Run the scripts in these browsers" )
     }
 
+    options{
+    ansiColor('xterm')
+}
+
     stages {
         stage('Building') {
            steps{
@@ -25,5 +29,11 @@ steps{
             echo "Deploying the application" 
         }
     }
+
+post {
+    success {
+      publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'surefire-report.html', reportName: 'Surefire Report', reportTitles: '', useWrapperFileDirectly: true])
+    }
+  }
 }
 }
