@@ -15,7 +15,7 @@ pipeline {
         
         stage('Test'){
             steps{
-                bat 'npm install --force'
+                bat 'npm-cache-{{checksum "package.json"}}'
                 bat "npx cypress run --browser ${BROWSER} --spec ${SPEC}"
             }
         }
