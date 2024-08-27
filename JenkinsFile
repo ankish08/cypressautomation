@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                bat 'npm ci' //To install all exact version dependencies
+                
+            }
+        }
+        stage('Test'){
+            steps{
+                bat 'npm test'
+            }
+        }
+    }
+}
