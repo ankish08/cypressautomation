@@ -12,8 +12,8 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh  "npm install"
-                sh  "npx cypress install"
+                bat  "npm install"
+                bat  "npx cypress install"
             }
         }
 
@@ -21,13 +21,13 @@ pipeline {
             parallel {
                 stage('Chrome Tests') {
                     steps {
-                        sh 'npx cypress run --browser chrome --spec "cypress/e2e/*.cy.js"'
+                        bat 'npx cypress run --browser chrome --spec "cypress/e2e/*.cy.js"'
                     }
                 }
 
                 stage('Firefox Tests') {
                     steps {
-                        sh 'npx cypress run --browser firefox --spec "cypress/e2e/*.cy.js"'
+                        bat 'npx cypress run --browser firefox --spec "cypress/e2e/*.cy.js"'
                     }
                 }
             }
