@@ -20,19 +20,19 @@ pipeline {
         }
 
         stage('Parallel Cypress Tests') {
-            parallel {
-                "Chrome Tests": {
-                    steps {
-                        sh 'npx cypress run --browser chrome --spec "cypress/e2e/*.cy.js"'
-                    }
-                }
-                "Firefox Tests": {
-                    steps {
-                        sh 'npx cypress run --browser firefox --spec "cypress/e2e/*.cy.js"'
-                    }
-                }
+    parallel {
+        stage('Chrome Tests') {
+            steps {
+                sh 'npx cypress run --browser chrome --spec "cypress/e2e/group1/**/*.cy.js"'
             }
         }
+        stage('Firefox Tests') {
+            steps {
+                sh 'npx cypress run --browser firefox --spec "cypress/e2e/group1/**/*.cy.js"'
+            }
+        }
+    }
+}
 
         stage('Allure Reports') {
             steps {
