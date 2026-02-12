@@ -1,11 +1,8 @@
 pipeline {
+
     agent any
 
-    options {
-        timestamps()
-    }
-
-    stages {
+    stages {  
 
         stage('Checkout') {
             steps {
@@ -15,39 +12,41 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh "npm ci"
+                sh  "npm install"
+                sh  "npx cypress install"
             }
         }
 
-        stage('Parallel Cypress Tests') {
-    parallel {
-        stage('Chrome Tests') {
-            steps {
-                sh 'npx cypress run --browser chrome --spec "cypress/e2e/group1/**/*.cy.js"'
-            }
-        }
-        stage('Firefox Tests') {
-            steps {
-                sh 'npx cypress run --browser firefox --spec "cypress/e2e/group1/**/*.cy.js"'
-            }
-        }
-    }
-}
+       stage('Parallel Cypress Tests') {
+            parallel {
+                stage('Chrome Tests') {
+                    steps {
+                        sh 'npx cypress run --browser chrome --spec "cypress/e2e/*.cy.js"'
+                    }
+                }
 
-        stage('Allure Reports') {
-            steps {
-                script {
-                    allure([
-                        includeProperties: false,
-                        jdk: '',
-                        properties: [],
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'target/allure-results']]
-                    ])
+                stage('Firefox Tests') {
+                    steps {
+                        sh 'npx cypress run --browser firefox --spec "cypress/e2e/*.cy.js"'
+                    }
                 }
             }
         }
+            
+    stage('reports') {
+    steps {
+    script {
+            allure([
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'target/allure-results']]
+            ])
     }
+    }
+}
+}
 
     post {
         always {
@@ -55,16 +54,7 @@ pipeline {
             archiveArtifacts artifacts: 'cypress/videos/**/*', allowEmptyArchive: true
         }
         success {
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: false,
-                keepAll: false,
-                reportDir: 'target/site',
-                reportFiles: 'surefire-report.html',
-                reportName: 'Surefire Report',
-                reportTitles: '',
-                useWrapperFileDirectly: true
-            ])
-        }
+      publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'surefire-report.html', reportName: 'Surefire Report', reportTitles: '', useWrapperFileDirectly: true])
+    }
     }
 }
