@@ -1,32 +1,40 @@
 pipeline {
+
     agent any
 
-    parameters{
-        string(name: 'SPEC', defaultValue: "cypress/e2e/**/**", description: "Run the scripts")
-        choice(name: 'BROWSER', choices:['chrome','edge','firefox'],description: "Run the scripts in these browsers" )
-    }
-options { ansiColor('xterm') }
+    stages {  
 
-    stages {
-        stage('Building') {
-           steps{
-              echo "Building the application" 
-            }
-}
-        
-        stage('Test'){
-            steps{
-                bat 'npm install'
-                bat 'npx cypress install'
-                bat "npx cypress run --browser ${BROWSER} --spec ${SPEC}"
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
         }
-        stage('Deploying'){
-steps{
-            echo "Deploying the application" 
+
+        stage('Install Dependencies') {
+            steps {
+                sh  "npm install"
+                sh  "npx cypress install"
+            }
         }
-    }
-stage('reports') {
+
+        stage('Parallel Cypress Tests') {
+
+            parallel {
+
+                stage('Chrome Tests')
+                    steps {
+                        sh 'npx cypress run --browser chrome --spec "cypress/e2e/group1/**/*.cy.js"'
+                    }
+                } 
+
+                stage('Firefox Test')
+                    steps {
+                        sh 'npx cypress run --browser firefox --spec "cypress/e2e/group1/**/*.cy.js"'
+                    }
+                }
+
+            
+    stage('reports') {
     steps {
     script {
             allure([
@@ -40,10 +48,14 @@ stage('reports') {
     }
 }
 }
-post {
-    success {
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'cypress/screenshots/**/*', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'cypress/videos/**/*', allowEmptyArchive: true
+        }
+        success {
       publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'surefire-report.html', reportName: 'Surefire Report', reportTitles: '', useWrapperFileDirectly: true])
     }
-  }
+    }
 }
-
