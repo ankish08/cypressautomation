@@ -53,6 +53,11 @@ pipeline {
             archiveArtifacts artifacts: 'cypress/screenshots/**/*', allowEmptyArchive: true
             archiveArtifacts artifacts: 'cypress/videos/**/*', allowEmptyArchive: true
         }
+always {
+            mail to: 'ankishc95@gmail.com',
+                 subject: "Jenkins Build: ${currentBuild.fullDisplayName}",
+                 body: "Build ${currentBuild.fullDisplayName} finished.\nStatus: ${currentBuild.currentResult}\nCheck console: ${env.BUILD_URL}"
+        }
         success {
       publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'surefire-report.html', reportName: 'Surefire Report', reportTitles: '', useWrapperFileDirectly: true])
     }
